@@ -31,6 +31,8 @@ const typeIcons: Record<string, React.ReactNode> = {
   'command': <Terminal className="w-4 h-4" />,
   'document': <FileText className="w-4 h-4" />,
   'info': <Info className="w-4 h-4" />,
+  'heartbeat': <Clock className="w-4 h-4" />,
+  'policy': <FileText className="w-4 h-4" />,
 };
 
 const typeColors: Record<string, string> = {
@@ -41,6 +43,8 @@ const typeColors: Record<string, string> = {
   'command': 'bg-zinc-500/10 text-zinc-500 border-zinc-500/20',
   'document': 'bg-cyan-500/10 text-cyan-500 border-cyan-500/20',
   'info': 'bg-sky-500/10 text-sky-500 border-sky-500/20',
+  'heartbeat': 'bg-rose-500/10 text-rose-500 border-rose-500/20',
+  'policy': 'bg-orange-500/10 text-orange-500 border-orange-500/20',
 };
 
 export function ActivityFeed() {
@@ -120,11 +124,22 @@ export function ActivityFeed() {
               {activity.description && (
                 <p className="text-sm text-zinc-400 mt-1 line-clamp-2">{activity.description}</p>
               )}
-              {activity.metadata && (
-                <pre className="text-xs text-zinc-500 mt-2 bg-zinc-950 p-2 rounded overflow-x-auto">
-                  {JSON.stringify(JSON.parse(activity.metadata), null, 2)}
-                </pre>
-              )}
+              {activity.metadata && (() => {
+                try {
+                  const parsed = JSON.parse(activity.metadata);
+                  return (
+                    <pre className="text-xs text-zinc-500 mt-2 bg-zinc-950 p-2 rounded overflow-x-auto">
+                      {JSON.stringify(parsed, null, 2)}
+                    </pre>
+                  );
+                } catch {
+                  return (
+                    <pre className="text-xs text-zinc-500 mt-2 bg-zinc-950 p-2 rounded overflow-x-auto">
+                      {activity.metadata}
+                    </pre>
+                  );
+                }
+              })()}
             </div>
           </div>
         );

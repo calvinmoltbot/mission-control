@@ -3,7 +3,7 @@
 # Log an activity to Mission Control
 # Usage: ./log-activity.sh <type> <title> [description] [metadata-json]
 
-API_URL="http://localhost:3000/api/activities"
+API_URL="http://localhost:3010/api/activities"
 
 TYPE=$1
 TITLE=$2
@@ -12,7 +12,7 @@ METADATA=$4
 
 if [ -z "$TYPE" ] || [ -z "$TITLE" ]; then
     echo "Usage: $0 <type> <title> [description] [metadata-json]"
-    echo "Types: email, calendar, search, task, command, document, info"
+    echo "Types: email, calendar, search, task, command, document, info, heartbeat, policy"
     exit 1
 fi
 

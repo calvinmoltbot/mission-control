@@ -39,7 +39,7 @@ export function Dashboard() {
     const fetchStats = async () => {
       try {
         const [activitiesRes, cronRes, gmailRes] = await Promise.all([
-          fetch('/api/activities?limit=1'),
+          fetch('/api/activities'),
           fetch('/api/cron'),
           fetch('/api/gmail?q=is:unread&max=1'),
         ]);
@@ -49,7 +49,7 @@ export function Dashboard() {
         const gmail = await gmailRes.json();
 
         setStats({
-          totalActivities: activities.activities?.length > 0 ? activities.activities[0]?.id || 0 : 0,
+          totalActivities: activities.activities?.length || 0,
           scheduledTasks: cron.tasks?.length || 0,
           memoryEntries: 0, // Would need to count memory files
           unreadEmails: gmail.emails?.length || 0,

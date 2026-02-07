@@ -36,4 +36,6 @@ export const ActivityTypes = {
   COMMAND: 'command',
   DOCUMENT: 'document',
   INFO: 'info',
+  HEARTBEAT: 'heartbeat',
+  POLICY: 'policy',
 } as const;

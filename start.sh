@@ -3,7 +3,7 @@
 # Mission Control Dashboard Startup Script
 # Usage: ./start.sh [port]
 
-PORT=${1:-3000}
+PORT=${1:-3010}
 
 echo "🃏 Starting Mission Control Dashboard..."
 echo ""
