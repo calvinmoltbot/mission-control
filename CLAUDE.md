@@ -248,11 +248,17 @@ await logActivity({
 
 The app uses `gog` (Google Workspace CLI) for Gmail and Calendar access:
 
+**Environment Variables:**
 ```bash
-# Required environment variable
+# Required - the Google account to use for Gmail/Calendar
 export GOG_ACCOUNT=calvinmoltbot@gmail.com
 
-# Commands used internally:
+# Optional - override workspace root for memory search
+export WORKSPACE_ROOT=/Users/admin/.openclaw/workspace
+```
+
+**Commands used internally:**
+```bash
 gog gmail messages search "is:unread" --max 20 --json
 gog calendar events <calendarId> --from <iso> --to <iso> --json
 ```
@@ -347,6 +353,9 @@ npm run build
 - **Local only:** This app is designed to run locally, not deployed publicly
 - **Read-only Gmail:** The app only reads emails, never sends
 - **Google Workspace:** Uses OAuth via `gog`, credentials stored in system keychain
+- **Shell injection protection:** API routes use `execFile()` with array arguments instead of `exec()` with string interpolation
+- **Input sanitization:** Gmail queries are sanitized to remove shell metacharacters
+- **Environment variables:** `GOG_ACCOUNT` and `WORKSPACE_ROOT` can be configured via env vars
 
 ---
 
