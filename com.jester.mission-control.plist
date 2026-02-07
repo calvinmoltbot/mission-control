@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.jester.mission-control</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/opt/homebrew/bin/npm</string>
+        <string>run</string>
+        <string>start</string>
+    </array>
+    <key>WorkingDirectory</key>
+    <string>/Users/admin/.openclaw/workspace/mission-control</string>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>KeepAlive</key>
+    <true/>
+    <key>StandardOutPath</key>
+    <string>/Users/admin/.openclaw/workspace/mission-control/logs/mission-control.log</string>
+    <key>StandardErrorPath</key>
+    <string>/Users/admin/.openclaw/workspace/mission-control/logs/mission-control-error.log</string>
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PATH</key>
+        <string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin</string>
+        <key>GOG_ACCOUNT</key>
+        <string>calvinmoltbot@gmail.com</string>
+        <key>WORKSPACE_ROOT</key>
+        <string>/Users/admin/.openclaw/workspace</string>
+    </dict>
+</dict>
+</plist>
