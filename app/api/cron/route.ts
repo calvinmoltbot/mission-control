@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { exec } from 'child_process';
+import { execFile } from 'child_process';
 import { promisify } from 'util';
 import { getDb, ScheduledTask } from '@/lib/db';
+import * as cronParser from 'cron-parser';
 
-const execAsync = promisify(exec);
+const execFileAsync = promisify(execFile);
 
 interface CronJob {
   jobId: string;
@@ -12,6 +13,7 @@ interface CronJob {
     kind: string;
     expr?: string;
     everyMs?: number;
+    tz?: string;
   };
   payload: {
     kind: string;
@@ -27,7 +29,7 @@ export async function GET(request: NextRequest) {
     // Try to fetch from OpenClaw cron
     let cronJobs: CronJob[] = [];
     try {
-      const { stdout } = await execAsync('openclaw cron list --json 2>/dev/null || echo "[]"');
+      const { stdout } = await execFileAsync('openclaw', ['cron', 'list', '--json']);
       cronJobs = JSON.parse(stdout || '[]');
     } catch (e) {
       console.log('OpenClaw cron not available, using DB only');
@@ -42,8 +44,8 @@ export async function GET(request: NextRequest) {
       let nextRun: Date | null = null;
       
       if (job.schedule.kind === 'cron' && job.schedule.expr) {
-        // Simple cron parsing for display
-        nextRun = estimateNextCronRun(job.schedule.expr);
+        // Use proper cron parser with timezone support
+        nextRun = estimateNextCronRun(job.schedule.expr, job.schedule.tz);
       } else if (job.schedule.kind === 'every' && job.schedule.everyMs) {
         nextRun = new Date(Date.now() + job.schedule.everyMs);
       }
@@ -75,20 +77,15 @@ export async function GET(request: NextRequest) {
   }
 }
 
-function estimateNextCronRun(cronExpr: string): Date {
-  // Simple estimation - in production, use a proper cron parser
-  const now = new Date();
-  const [minute, hour, day, month, dayOfWeek] = cronExpr.split(' ');
-  
-  const next = new Date(now);
-  next.setSeconds(0);
-  
-  if (minute !== '*') next.setMinutes(parseInt(minute));
-  if (hour !== '*') next.setHours(parseInt(hour));
-  
-  if (next <= now) {
-    next.setDate(next.getDate() + 1);
+function estimateNextCronRun(cronExpr: string, timezone?: string): Date | null {
+  try {
+    // Use cron-parser for accurate next-run calculations
+    const interval = cronParser.parseExpression(cronExpr, {
+      tz: timezone || 'Europe/London'
+    });
+    return interval.next().toDate();
+  } catch (e) {
+    console.error('Failed to parse cron expression:', cronExpr, e);
+    return null;
   }
-  
-  return next;
 }

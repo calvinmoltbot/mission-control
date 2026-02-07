@@ -1,8 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { exec } from 'child_process';
+import { execFile } from 'child_process';
 import { promisify } from 'util';
 
-const execAsync = promisify(exec);
+const execFileAsync = promisify(execFile);
+
+// Get GOG account from environment variable or default
+const GOG_ACCOUNT = process.env.GOG_ACCOUNT || 'calvinmoltbot@gmail.com';
+
+// Sanitize gmail query to prevent shell injection
+function sanitizeGmailQuery(query: string): string {
+  // Remove any characters that could be used for shell injection
+  // Gmail search queries only need: alphanumeric, spaces, quotes, colons, operators
+  return query.replace(/[;&|`$(){}[\]\\]/g, '');
+}
 
 interface EmailMessage {
   id: string;
@@ -18,14 +28,16 @@ interface EmailMessage {
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const query = searchParams.get('q') || 'is:unread';
+    const rawQuery = searchParams.get('q') || 'is:unread';
+    const query = sanitizeGmailQuery(rawQuery);
     const max = parseInt(searchParams.get('max') || '20');
 
-    // Fetch emails using gog
-    const { stdout } = await execAsync(
-      `gog gmail messages search "${query}" --max ${max} --account calvinmoltbot@gmail.com --json 2>/dev/null || echo '{"messages":[]}'`,
-      { env: { ...process.env, GOG_ACCOUNT: 'calvinmoltbot@gmail.com' } }
-    );
+    // Fetch emails using gog - use execFile for security (array args, no shell interpolation)
+    const { stdout } = await execFileAsync(
+      'gog',
+      ['gmail', 'messages', 'search', query, '--max', max.toString(), '--account', GOG_ACCOUNT, '--json'],
+      { env: { ...process.env, GOG_ACCOUNT } }
+    ).catch(() => ({ stdout: '{"messages":[]}' }));
 
     const data = JSON.parse(stdout || '{"messages":[]}');
     const messages: EmailMessage[] = [];
@@ -77,11 +89,13 @@ export async function PATCH(request: NextRequest) {
       );
     }
 
-    // Use gog to modify labels
+    // Use gog to modify labels - use execFile for security
     const action = markAsRead ? 'remove' : 'add';
-    await execAsync(
-      `gog gmail messages modify ${messageId} --${action}-labels UNREAD --account calvinmoltbot@gmail.com`,
-      { env: { ...process.env, GOG_ACCOUNT: 'calvinmoltbot@gmail.com' } }
+    const labelFlag = `--${action}-labels`;
+    await execFileAsync(
+      'gog',
+      ['gmail', 'messages', 'modify', messageId, labelFlag, 'UNREAD', '--account', GOG_ACCOUNT],
+      { env: { ...process.env, GOG_ACCOUNT } }
     );
 
     return NextResponse.json({ success: true });

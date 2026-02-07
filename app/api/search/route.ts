@@ -45,13 +45,14 @@ export async function GET(request: NextRequest) {
       });
     });
 
-    // Search memory files
-    const memoryPath = path.join(process.cwd(), '..', '..', 'memory');
+    // Search memory files - use environment variable or default to workspace structure
+    const workspaceRoot = process.env.WORKSPACE_ROOT || path.join(process.cwd(), '..', '..');
+    const memoryPath = path.join(workspaceRoot, 'memory');
     const memoryResults = await searchMemoryFiles(memoryPath, query);
     results.push(...memoryResults);
 
     // Search main MEMORY.md
-    const mainMemoryPath = path.join(process.cwd(), '..', '..', 'MEMORY.md');
+    const mainMemoryPath = path.join(workspaceRoot, 'MEMORY.md');
     try {
       const content = await readFile(mainMemoryPath, 'utf-8');
       if (content.toLowerCase().includes(query)) {

@@ -1,9 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { exec } from 'child_process';
+import { execFile } from 'child_process';
 import { promisify } from 'util';
 import { format, addDays, startOfDay, endOfDay } from 'date-fns';
 
-const execAsync = promisify(exec);
+const execFileAsync = promisify(execFile);
+
+// Get GOG account from environment variable or default
+const GOG_ACCOUNT = process.env.GOG_ACCOUNT || 'calvinmoltbot@gmail.com';
 
 interface CalendarEvent {
   id: string;
@@ -25,16 +28,17 @@ export async function GET(request: NextRequest) {
     const from = format(startOfDay(now), "yyyy-MM-dd'T'HH:mm:ssXXX");
     const to = format(endOfDay(addDays(now, days)), "yyyy-MM-dd'T'HH:mm:ssXXX");
 
-    // Fetch calendar events using gog
-    const cmd = `gog calendar events calvinmoltbot@gmail.com --from "${from}" --to "${to}" --account calvinmoltbot@gmail.com --json`;
-    console.log('Executing:', cmd);
-    
+    // Fetch calendar events using gog - use execFile for security (array args, no shell interpolation)
     let stdout: string;
     try {
-      const result = await execAsync(cmd, {
-        env: { ...process.env, GOG_ACCOUNT: 'calvinmoltbot@gmail.com' },
-        timeout: 10000
-      });
+      const result = await execFileAsync(
+        'gog',
+        ['calendar', 'events', GOG_ACCOUNT, '--from', from, '--to', to, '--account', GOG_ACCOUNT, '--json'],
+        {
+          env: { ...process.env, GOG_ACCOUNT },
+          timeout: 10000
+        }
+      );
       stdout = result.stdout;
     } catch (execError: any) {
       console.error('gog command failed:', execError.stderr || execError.message);
