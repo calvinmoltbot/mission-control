@@ -101,9 +101,9 @@ npm start
 -- Activities table
 CREATE TABLE activities (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
-  type TEXT NOT NULL,        -- email, calendar, search, task, command, document, info, heartbeat
+  type TEXT NOT NULL,        -- email, calendar, search, task, command, document, info, heartbeat, policy
   title TEXT NOT NULL,
-  description TEXT,
+ description TEXT,
   metadata TEXT,             -- JSON string
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
@@ -178,6 +178,70 @@ GET /api/cron
 
 ---
 
+## Logging Activities from Jester
+
+### Logging Policy: Batch Logging (Recommended)
+
+To minimize token usage, Jester uses **batch logging**:
+
+1. **During session:** Track all significant actions in memory
+2. **At session end:** Batch log everything to Mission Control
+3. **Trigger phrases:** "check Mission Control", "log this", "wrap up", or naturally at conversation end
+
+### What Gets Logged
+
+| Type | Use For | Examples |
+|------|---------|----------|
+| `email` | Email triage, processing | Labels applied, emails archived |
+| `calendar` | Calendar operations | Events created, modified |
+| `search` | Web searches, lookups | Research completed |
+| `task` | Completed tasks | Commands executed |
+| `command` | Shell commands | File operations |
+| `document` | File operations | Reports created |
+| `info` | General information | Policy updates |
+| `heartbeat` | Periodic check-ins | Email triage checks |
+| `policy` | Rule/workflow changes | New triage rules |
+
+### Logging Methods
+
+#### Method 1: Direct HTTP
+
+```typescript
+await fetch('http://localhost:3010/api/activities', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    type: 'task',
+    title: 'Task completed',
+    description: 'Details here',
+    metadata: { key: 'value' }
+  }),
+});
+```
+
+#### Method 2: Using the Logger Utility
+
+```typescript
+import { logActivity, ActivityTypes } from './lib/activity-logger';
+
+await logActivity({
+  type: ActivityTypes.TASK,
+  title: 'Task completed',
+  description: 'Details here',
+  metadata: { key: 'value' }
+});
+```
+
+#### Method 3: CLI Helper (from workspace root)
+
+```bash
+./mission-control/jester-log task "Task Title" "Description" '{"key":"value"}'
+```
+
+**Note:** CLI helper handles the HTTP call internally.
+
+---
+
 ## External Integrations
 
 ### Google Workspace (via `gog` CLI)
@@ -195,58 +259,19 @@ gog calendar events <calendarId> --from <iso> --to <iso> --json
 
 **Note:** If `gog` is not authenticated, the Gmail and Calendar widgets will show errors but the rest of the app works fine.
 
----
+### OpenClaw Integration
 
-## Logging Activities from Jester
-
-### Method 1: Direct HTTP (Recommended)
-
-```typescript
-await fetch('http://localhost:3010/api/activities', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({
-    type: 'task',
-    title: 'Task completed',
-    description: 'Details here',
-    metadata: { key: 'value' }
-  }),
-});
-```
-
-### Method 2: Using the Logger Utility
-
-```typescript
-import { logActivity, ActivityTypes } from './lib/activity-logger';
-
-await logActivity({
-  type: ActivityTypes.TASK,
-  title: 'Task completed',
-  description: 'Details here',
-  metadata: { key: 'value' }
-});
-```
-
-### Method 3: CLI Helper
+Mission Control integrates with OpenClaw heartbeat checks:
 
 ```bash
-./jester-log task "Task Title" "Description" '{"key":"value"}'
+# Heartbeats automatically log to Mission Control
+# See HEARTBEAT.md in workspace for full workflow
 ```
 
----
-
-## Activity Types
-
-| Type | Use For |
-|------|---------|
-| `email` | Email triage, processing |
-| `calendar` | Calendar operations |
-| `search` | Web searches, lookups |
-| `task` | Completed tasks |
-| `command` | Shell commands executed |
-| `document` | File operations |
-| `info` | General information |
-| `heartbeat` | Periodic check-ins |
+**Key points:**
+- Heartbeat checks log automatically (no batch needed)
+- Other actions use batch logging at session end
+- All sessions (Telegram, TUI, etc.) follow same policy
 
 ---
 
@@ -270,6 +295,12 @@ Edit `lib/db.ts`:
 - Add new tables in `initDb()`
 - Add TypeScript interfaces
 - The database auto-migrates on startup
+
+### Adding a New Activity Type
+
+1. Add type to `lib/activity-logger.ts` → `ActivityTypes` enum
+2. Update database if needed (SQLite is flexible)
+3. Document in CLAUDE.md (this file)
 
 ---
 
@@ -302,6 +333,11 @@ npm run build
 - Check `gog auth list` is authenticated
 - Verify `GOG_ACCOUNT` environment variable
 - Check console for error messages
+
+### Activities Not Appearing
+- Check browser console for fetch errors
+- Verify server is running: `curl http://localhost:3010/api/activities`
+- Check `logs/mission-control-error.log`
 
 ---
 
@@ -337,6 +373,14 @@ npm run build
 
 ---
 
+## Related Documentation
+
+- **MEMORY.md** — Full Mission Control Logging Policy
+- **AGENTS.md** — Cross-session logging guidelines
+- **HEARTBEAT.md** — OpenClaw heartbeat integration
+
+---
+
 ## Questions?
 
 If something isn't working:
@@ -347,4 +391,4 @@ If something isn't working:
 
 ---
 
-*Last updated: 6 February 2026*
+*Last updated: 7 February 2026*
