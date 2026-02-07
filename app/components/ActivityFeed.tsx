@@ -2,16 +2,18 @@
 
 import { useEffect, useState } from 'react';
 import { formatDistanceToNow } from 'date-fns';
-import { 
-  CheckCircle, 
-  AlertCircle, 
-  Info, 
+import {
+  CheckCircle,
+  AlertCircle,
+  Info,
   Clock,
   Mail,
   Calendar,
   FileText,
   Search,
-  Terminal
+  Terminal,
+  ChevronDown,
+  ChevronRight
 } from 'lucide-react';
 
 interface Activity {
@@ -36,16 +38,45 @@ const typeIcons: Record<string, React.ReactNode> = {
 };
 
 const typeColors: Record<string, string> = {
-  'email': 'bg-blue-500/10 text-blue-500 border-blue-500/20',
-  'calendar': 'bg-purple-500/10 text-purple-500 border-purple-500/20',
-  'search': 'bg-amber-500/10 text-amber-500 border-amber-500/20',
-  'task': 'bg-green-500/10 text-green-500 border-green-500/20',
-  'command': 'bg-zinc-500/10 text-zinc-500 border-zinc-500/20',
-  'document': 'bg-cyan-500/10 text-cyan-500 border-cyan-500/20',
-  'info': 'bg-sky-500/10 text-sky-500 border-sky-500/20',
-  'heartbeat': 'bg-rose-500/10 text-rose-500 border-rose-500/20',
-  'policy': 'bg-orange-500/10 text-orange-500 border-orange-500/20',
+  'email': 'text-blue-400',
+  'calendar': 'text-purple-400',
+  'search': 'text-amber-400',
+  'task': 'text-emerald-400',
+  'command': 'text-zinc-400',
+  'document': 'text-cyan-400',
+  'info': 'text-sky-400',
+  'heartbeat': 'text-rose-400',
+  'policy': 'text-orange-400',
 };
+
+function MetadataToggle({ metadata }: { metadata: string }) {
+  const [expanded, setExpanded] = useState(false);
+
+  let display: string;
+  try {
+    const parsed = JSON.parse(metadata);
+    display = JSON.stringify(parsed, null, 2);
+  } catch {
+    display = metadata;
+  }
+
+  return (
+    <div className="mt-2">
+      <button
+        onClick={() => setExpanded(!expanded)}
+        className="flex items-center gap-1 text-xs text-zinc-600 hover:text-zinc-400 transition-colors"
+      >
+        {expanded ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
+        <span>{expanded ? 'Hide' : 'Show'} details</span>
+      </button>
+      {expanded && (
+        <pre className="text-xs text-zinc-500 mt-2 bg-black/30 p-3 rounded-lg overflow-x-auto border border-white/[0.04] animate-fade-in">
+          {display}
+        </pre>
+      )}
+    </div>
+  );
+}
 
 export function ActivityFeed() {
   const [activities, setActivities] = useState<Activity[]>([]);
@@ -67,7 +98,6 @@ export function ActivityFeed() {
 
   useEffect(() => {
     fetchActivities();
-    // Poll for new activities every 30 seconds
     const interval = setInterval(fetchActivities, 30000);
     return () => clearInterval(interval);
   }, []);
@@ -75,14 +105,14 @@ export function ActivityFeed() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-zinc-500"></div>
+        <div className="w-8 h-8 rounded-full border-2 border-indigo-500/30 border-t-indigo-500 animate-spin"></div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="flex items-center justify-center h-64 text-red-500">
+      <div className="flex items-center justify-center h-64 text-red-400">
         <AlertCircle className="w-5 h-5 mr-2" />
         {error}
       </div>
@@ -92,54 +122,44 @@ export function ActivityFeed() {
   if (activities.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center h-64 text-zinc-500">
-        <Clock className="w-12 h-12 mb-4 opacity-50" />
-        <p>No activities recorded yet</p>
-        <p className="text-sm mt-1">Activities will appear here as tasks are completed</p>
+        <Clock className="w-12 h-12 mb-4 opacity-30" />
+        <p className="font-medium">No activities recorded yet</p>
+        <p className="text-sm mt-1 text-zinc-600">Activities will appear here as tasks are completed</p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-2 stagger-children">
       {activities.map((activity) => {
         const type = activity.type || 'info';
         const icon = typeIcons[type] || typeIcons['info'];
         const colorClass = typeColors[type] || typeColors['info'];
-        
+        const borderClass = `activity-border-${type}`;
+
         return (
           <div
             key={activity.id}
-            className="flex items-start gap-3 p-4 rounded-lg border border-zinc-800 bg-zinc-900/50 hover:bg-zinc-900 transition-colors"
+            className={`${borderClass} p-4 rounded-lg bg-white/[0.02] hover:bg-white/[0.04] border border-white/[0.04] hover:border-white/[0.08] transition-all duration-200`}
           >
-            <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center border ${colorClass}`}>
-              {icon}
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center justify-between gap-2">
-                <h4 className="font-medium text-zinc-100 truncate">{activity.title}</h4>
-                <span className="text-xs text-zinc-500 flex-shrink-0">
-                  {formatDistanceToNow(new Date(activity.created_at), { addSuffix: true })}
-                </span>
+            <div className="flex items-start gap-3">
+              <div className={`flex-shrink-0 mt-0.5 ${colorClass}`}>
+                {icon}
               </div>
-              {activity.description && (
-                <p className="text-sm text-zinc-400 mt-1 line-clamp-2">{activity.description}</p>
-              )}
-              {activity.metadata && (() => {
-                try {
-                  const parsed = JSON.parse(activity.metadata);
-                  return (
-                    <pre className="text-xs text-zinc-500 mt-2 bg-zinc-950 p-2 rounded overflow-x-auto">
-                      {JSON.stringify(parsed, null, 2)}
-                    </pre>
-                  );
-                } catch {
-                  return (
-                    <pre className="text-xs text-zinc-500 mt-2 bg-zinc-950 p-2 rounded overflow-x-auto">
-                      {activity.metadata}
-                    </pre>
-                  );
-                }
-              })()}
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between gap-2">
+                  <h4 className="font-medium text-zinc-200 truncate">{activity.title}</h4>
+                  <span className="text-[11px] text-zinc-600 flex-shrink-0 tabular-nums">
+                    {formatDistanceToNow(new Date(activity.created_at), { addSuffix: true })}
+                  </span>
+                </div>
+                {activity.description && (
+                  <p className="text-sm text-zinc-500 mt-1 line-clamp-2">{activity.description}</p>
+                )}
+                {activity.metadata && (
+                  <MetadataToggle metadata={activity.metadata} />
+                )}
+              </div>
             </div>
           </div>
         );

@@ -15,7 +15,6 @@ interface CalendarEvent {
   isAllDay: boolean;
 }
 
-// Safe date parsing helper
 function safeParseDate(dateStr: string): Date | null {
   if (!dateStr) return null;
   try {
@@ -48,7 +47,6 @@ export function CalendarWidget() {
 
   useEffect(() => {
     fetchEvents();
-    // Poll every 5 minutes
     const interval = setInterval(fetchEvents, 300000);
     return () => clearInterval(interval);
   }, []);
@@ -78,29 +76,29 @@ export function CalendarWidget() {
   };
 
   return (
-    <div className="bg-zinc-900/30 border border-zinc-800 rounded-xl p-6">
+    <div className="glass-card p-6">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-purple-500/10 border border-purple-500/20 flex items-center justify-center">
-            <Calendar className="w-5 h-5 text-purple-400" />
+          <div className="w-10 h-10 rounded-xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center">
+            <Calendar className="w-5 h-5 text-violet-400" />
           </div>
           <div>
-            <h3 className="font-semibold text-zinc-100">Calendar</h3>
+            <h3 className="font-semibold text-white">Calendar</h3>
             <p className="text-xs text-zinc-500">Next 7 days</p>
           </div>
         </div>
         <button
           onClick={fetchEvents}
           disabled={loading}
-          className="p-2 hover:bg-zinc-800 rounded-lg transition-colors disabled:opacity-50"
+          className="p-2 hover:bg-white/[0.06] rounded-lg transition-all duration-200 disabled:opacity-50"
         >
-          <RefreshCw className={`w-4 h-4 text-zinc-400 ${loading ? 'animate-spin' : ''}`} />
+          <RefreshCw className={`w-4 h-4 text-zinc-500 ${loading ? 'animate-spin' : ''}`} />
         </button>
       </div>
 
       {loading && events.length === 0 && (
         <div className="flex items-center justify-center py-8">
-          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-zinc-500"></div>
+          <div className="w-6 h-6 rounded-full border-2 border-indigo-500/30 border-t-indigo-500 animate-spin"></div>
         </div>
       )}
 
@@ -112,32 +110,32 @@ export function CalendarWidget() {
       )}
 
       {!loading && !error && events.length === 0 && (
-        <div className="flex flex-col items-center justify-center py-8 text-zinc-500">
-          <Calendar className="w-10 h-10 mb-2 opacity-50" />
+        <div className="flex flex-col items-center justify-center py-8 text-zinc-600">
+          <Calendar className="w-10 h-10 mb-2 opacity-30" />
           <p className="text-sm">No upcoming events</p>
         </div>
       )}
 
-      <div className="space-y-3">
+      <div className="space-y-2">
         {events.slice(0, 5).map((event) => (
           <div
             key={event.id}
-            className="flex items-start gap-3 p-3 rounded-lg border border-zinc-800 bg-zinc-900/50 hover:bg-zinc-800/50 transition-colors"
+            className="flex items-start gap-3 p-3 rounded-xl border-l-3 border-l-violet-500/40 border border-white/[0.04] bg-white/[0.02] hover:bg-white/[0.05] transition-all duration-200"
           >
-            <div className="flex-shrink-0 w-14 text-center">
-              <div className="text-xs text-zinc-500 uppercase tracking-wider">
+            <div className="flex-shrink-0 w-14 text-center pt-0.5">
+              <div className="text-[11px] text-zinc-500 font-medium">
                 {getEventTimeLabel(event.start)}
               </div>
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-zinc-200 truncate">{event.title}</p>
-              <div className="flex items-center gap-3 mt-1 text-xs text-zinc-500">
-                <span className="flex items-center gap-1">
+              <div className="flex flex-col gap-0.5 mt-1">
+                <span className="flex items-center gap-1 text-xs text-zinc-500">
                   <Clock className="w-3 h-3" />
                   {formatTime(event.start, event.end, event.isAllDay)}
                 </span>
                 {event.location && (
-                  <span className="flex items-center gap-1">
+                  <span className="flex items-center gap-1 text-xs text-zinc-600">
                     <MapPin className="w-3 h-3" />
                     <span className="truncate">{event.location}</span>
                   </span>
@@ -147,7 +145,7 @@ export function CalendarWidget() {
           </div>
         ))}
         {events.length > 5 && (
-          <p className="text-xs text-zinc-500 text-center pt-2">
+          <p className="text-xs text-zinc-600 text-center pt-2">
             +{events.length - 5} more events
           </p>
         )}

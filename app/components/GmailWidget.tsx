@@ -40,7 +40,6 @@ export function GmailWidget() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ messageId, markAsRead: true }),
       });
-      // Refresh list
       fetchEmails();
     } catch (err) {
       console.error('Failed to mark as read:', err);
@@ -49,7 +48,6 @@ export function GmailWidget() {
 
   useEffect(() => {
     fetchEmails();
-    // Poll every 60 seconds
     const interval = setInterval(fetchEmails, 60000);
     return () => clearInterval(interval);
   }, []);
@@ -57,34 +55,34 @@ export function GmailWidget() {
   const unreadCount = emails.filter(e => e.isUnread).length;
 
   return (
-    <div className="bg-zinc-900/30 border border-zinc-800 rounded-xl p-6">
+    <div className="glass-card p-6">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-3">
-          <div className="relative">
+          <div className="relative w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center">
             <Mail className="w-5 h-5 text-blue-400" />
             {unreadCount > 0 && (
-              <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full text-[10px] flex items-center justify-center font-medium">
+              <span className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 rounded-full text-[10px] flex items-center justify-center font-bold ring-2 ring-[oklch(0.12_0.008_280)]">
                 {unreadCount}
               </span>
             )}
           </div>
           <div>
-            <h3 className="font-semibold text-zinc-100">Gmail</h3>
+            <h3 className="font-semibold text-white">Gmail</h3>
             <p className="text-xs text-zinc-500">calvinmoltbot@gmail.com</p>
           </div>
         </div>
         <button
           onClick={fetchEmails}
           disabled={loading}
-          className="p-2 hover:bg-zinc-800 rounded-lg transition-colors disabled:opacity-50"
+          className="p-2 hover:bg-white/[0.06] rounded-lg transition-all duration-200 disabled:opacity-50"
         >
-          <RefreshCw className={`w-4 h-4 text-zinc-400 ${loading ? 'animate-spin' : ''}`} />
+          <RefreshCw className={`w-4 h-4 text-zinc-500 ${loading ? 'animate-spin' : ''}`} />
         </button>
       </div>
 
       {loading && emails.length === 0 && (
         <div className="flex items-center justify-center py-8">
-          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-zinc-500"></div>
+          <div className="w-6 h-6 rounded-full border-2 border-indigo-500/30 border-t-indigo-500 animate-spin"></div>
         </div>
       )}
 
@@ -96,9 +94,10 @@ export function GmailWidget() {
       )}
 
       {!loading && !error && emails.length === 0 && (
-        <div className="flex flex-col items-center justify-center py-8 text-zinc-500">
-          <Inbox className="w-10 h-10 mb-2 opacity-50" />
-          <p className="text-sm">No unread emails</p>
+        <div className="flex flex-col items-center justify-center py-8 text-zinc-600">
+          <Inbox className="w-10 h-10 mb-2 opacity-30" />
+          <p className="text-sm font-medium">All caught up</p>
+          <p className="text-xs mt-0.5 text-zinc-700">No unread emails</p>
         </div>
       )}
 
@@ -106,10 +105,10 @@ export function GmailWidget() {
         {emails.slice(0, 5).map((email) => (
           <div
             key={email.id}
-            className={`p-3 rounded-lg border transition-colors ${
-              email.isUnread 
-                ? 'bg-zinc-800/50 border-zinc-700' 
-                : 'bg-zinc-900/30 border-zinc-800'
+            className={`p-3 rounded-xl border transition-all duration-200 group ${
+              email.isUnread
+                ? 'bg-white/[0.04] border-white/[0.08] hover:bg-white/[0.06]'
+                : 'bg-white/[0.02] border-white/[0.04] hover:bg-white/[0.04]'
             }`}
           >
             <div className="flex items-start justify-between gap-2">
@@ -118,24 +117,24 @@ export function GmailWidget() {
                   {email.isUnread && (
                     <span className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0"></span>
                   )}
-                  <p className={`text-sm truncate ${email.isUnread ? 'font-medium text-zinc-200' : 'text-zinc-400'}`}>
+                  <p className={`text-sm truncate ${email.isUnread ? 'font-medium text-zinc-200' : 'text-zinc-500'}`}>
                     {email.from}
                   </p>
                 </div>
                 <p className="text-sm text-zinc-300 mt-1 truncate">{email.subject}</p>
-                <p className="text-xs text-zinc-500 mt-1 line-clamp-1">{email.snippet}</p>
+                <p className="text-xs text-zinc-600 mt-1 line-clamp-1">{email.snippet}</p>
               </div>
               <div className="flex flex-col items-end gap-1">
-                <span className="text-xs text-zinc-600">
+                <span className="text-[11px] text-zinc-600 tabular-nums">
                   {formatDistanceToNow(new Date(email.date), { addSuffix: true })}
                 </span>
                 {email.isUnread && (
                   <button
                     onClick={() => markAsRead(email.id)}
-                    className="p-1 hover:bg-zinc-700 rounded"
+                    className="p-1 hover:bg-white/[0.1] rounded opacity-0 group-hover:opacity-100 transition-all"
                     title="Mark as read"
                   >
-                    <CheckCircle className="w-3 h-3 text-zinc-500 hover:text-green-400" />
+                    <CheckCircle className="w-3.5 h-3.5 text-zinc-600 hover:text-emerald-400 transition-colors" />
                   </button>
                 )}
               </div>
@@ -143,7 +142,7 @@ export function GmailWidget() {
           </div>
         ))}
         {emails.length > 5 && (
-          <p className="text-xs text-zinc-500 text-center pt-2">
+          <p className="text-xs text-zinc-600 text-center pt-2">
             +{emails.length - 5} more emails
           </p>
         )}

@@ -83,37 +83,37 @@
 }
 
 .dark {
-  --background: oklch(0.141 0.005 285.823);
+  --background: oklch(0.12 0.008 280);
   --foreground: oklch(0.985 0 0);
-  --card: oklch(0.21 0.006 285.885);
+  --card: oklch(0.17 0.01 280);
   --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.21 0.006 285.885);
+  --popover: oklch(0.17 0.01 280);
   --popover-foreground: oklch(0.985 0 0);
   --primary: oklch(0.92 0.004 286.32);
-  --primary-foreground: oklch(0.21 0.006 285.885);
-  --secondary: oklch(0.274 0.006 286.033);
+  --primary-foreground: oklch(0.17 0.01 280);
+  --secondary: oklch(0.22 0.012 280);
   --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.274 0.006 286.033);
-  --muted-foreground: oklch(0.705 0.015 286.067);
-  --accent: oklch(0.274 0.006 286.033);
+  --muted: oklch(0.22 0.012 280);
+  --muted-foreground: oklch(0.65 0.02 280);
+  --accent: oklch(0.22 0.012 280);
   --accent-foreground: oklch(0.985 0 0);
   --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.552 0.016 285.938);
+  --border: oklch(1 0 0 / 8%);
+  --input: oklch(1 0 0 / 12%);
+  --ring: oklch(0.55 0.15 280);
   --chart-1: oklch(0.488 0.243 264.376);
   --chart-2: oklch(0.696 0.17 162.48);
   --chart-3: oklch(0.769 0.188 70.08);
   --chart-4: oklch(0.627 0.265 303.9);
   --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.21 0.006 285.885);
+  --sidebar: oklch(0.15 0.01 280);
   --sidebar-foreground: oklch(0.985 0 0);
   --sidebar-primary: oklch(0.488 0.243 264.376);
   --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.274 0.006 286.033);
+  --sidebar-accent: oklch(0.22 0.012 280);
   --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.552 0.016 285.938);
+  --sidebar-border: oklch(1 0 0 / 8%);
+  --sidebar-ring: oklch(0.55 0.15 280);
 }
 
 @layer base {
@@ -124,3 +124,118 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* === Animations === */
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 8px oklch(0.55 0.15 280 / 0.3); }
+  50% { box-shadow: 0 0 16px oklch(0.55 0.15 280 / 0.5); }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.4s ease-out both;
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.5s ease-out both;
+}
+
+.animate-shimmer {
+  background: linear-gradient(90deg, transparent 0%, oklch(1 0 0 / 5%) 50%, transparent 100%);
+  background-size: 200% 100%;
+  animation: shimmer 2s ease-in-out infinite;
+}
+
+/* === Glass Card === */
+
+.glass-card {
+  background: oklch(1 0 0 / 3%);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid oklch(1 0 0 / 8%);
+  border-radius: 1rem;
+  transition: all 0.2s ease;
+}
+
+.glass-card:hover {
+  background: oklch(1 0 0 / 5%);
+  border-color: oklch(1 0 0 / 12%);
+  box-shadow: 0 0 0 1px oklch(0.55 0.15 280 / 0.1), 0 8px 32px oklch(0 0 0 / 0.3);
+}
+
+/* === Stat Card Glow === */
+
+.stat-card {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.25s ease;
+}
+
+.stat-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, oklch(1 0 0 / 10%), transparent, oklch(1 0 0 / 5%));
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  -webkit-mask-composite: xor;
+  pointer-events: none;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px oklch(0 0 0 / 0.4);
+}
+
+/* === Tab indicator glow === */
+
+.tab-active {
+  border-color: oklch(0.55 0.15 280) !important;
+  color: oklch(0.95 0 0) !important;
+  text-shadow: 0 0 12px oklch(0.55 0.15 280 / 0.4);
+}
+
+/* === Activity border accents === */
+
+.activity-border-email { border-left: 3px solid oklch(0.6 0.2 250); }
+.activity-border-calendar { border-left: 3px solid oklch(0.6 0.2 300); }
+.activity-border-search { border-left: 3px solid oklch(0.7 0.15 80); }
+.activity-border-task { border-left: 3px solid oklch(0.65 0.2 150); }
+.activity-border-command { border-left: 3px solid oklch(0.6 0.01 280); }
+.activity-border-document { border-left: 3px solid oklch(0.65 0.15 200); }
+.activity-border-info { border-left: 3px solid oklch(0.65 0.15 230); }
+.activity-border-heartbeat { border-left: 3px solid oklch(0.65 0.2 15); }
+.activity-border-policy { border-left: 3px solid oklch(0.65 0.15 50); }
+
+/* === Stagger children animation === */
+
+.stagger-children > * {
+  animation: fade-in-up 0.4s ease-out both;
+}
+.stagger-children > *:nth-child(1) { animation-delay: 0ms; }
+.stagger-children > *:nth-child(2) { animation-delay: 50ms; }
+.stagger-children > *:nth-child(3) { animation-delay: 100ms; }
+.stagger-children > *:nth-child(4) { animation-delay: 150ms; }
+.stagger-children > *:nth-child(5) { animation-delay: 200ms; }
+.stagger-children > *:nth-child(6) { animation-delay: 250ms; }
+.stagger-children > *:nth-child(7) { animation-delay: 300ms; }
+.stagger-children > *:nth-child(8) { animation-delay: 350ms; }
+.stagger-children > *:nth-child(9) { animation-delay: 400ms; }
+.stagger-children > *:nth-child(10) { animation-delay: 450ms; }
