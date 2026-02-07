@@ -15,6 +15,7 @@ import { CalendarView } from './CalendarView';
 import { GlobalSearch } from './GlobalSearch';
 import { GmailWidget } from './GmailWidget';
 import { CalendarWidget } from './CalendarWidget';
+import { MoonshotWidget } from './MoonshotWidget';
 
 type Tab = 'overview' | 'activity' | 'calendar' | 'search';
 
@@ -158,29 +159,30 @@ export function Dashboard() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <GmailWidget />
               <CalendarWidget />
+              <MoonshotWidget />
+            </div>
 
-              {/* Recent Activity */}
-              <div className="glass-card p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center">
-                      <Activity className="w-5 h-5 text-blue-400" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-white">Recent Activity</h3>
-                      <p className="text-xs text-zinc-500">Latest actions</p>
-                    </div>
+            {/* Recent Activity — Full Width */}
+            <div className="glass-card p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center">
+                    <Activity className="w-5 h-5 text-blue-400" />
                   </div>
-                  <button
-                    onClick={() => setActiveTab('activity')}
-                    className="text-sm text-zinc-500 hover:text-indigo-400 transition-colors"
-                  >
-                    View all &rarr;
-                  </button>
+                  <div>
+                    <h3 className="font-semibold text-white">Recent Activity</h3>
+                    <p className="text-xs text-zinc-500">Latest actions</p>
+                  </div>
                 </div>
-                <div className="max-h-[350px] overflow-y-auto">
-                  <ActivityFeed />
-                </div>
+                <button
+                  onClick={() => setActiveTab('activity')}
+                  className="text-sm text-zinc-500 hover:text-indigo-400 transition-colors"
+                >
+                  View all &rarr;
+                </button>
+              </div>
+              <div className="max-h-[400px] overflow-y-auto">
+                <ActivityFeed />
               </div>
             </div>
 
