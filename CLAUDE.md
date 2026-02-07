@@ -4,6 +4,29 @@ This file contains everything Claude Code needs to know to work effectively with
 
 ---
 
+## !! DEVELOPMENT POLICY — READ FIRST !!
+
+**All Mission Control code changes are made exclusively through Claude Code.**
+
+Do NOT modify source files directly in the openclaw workspace. This causes merge conflicts, lost work, and broken deployments. If you need a change to Mission Control (new widget, bug fix, feature, etc.):
+
+1. **Tell the user** to use Claude Code with the `/mission-control` skill
+2. **Log a request** to the activity feed so it can be picked up later
+3. **Never edit** `.tsx`, `.ts`, `.css`, or other source files in this directory
+
+The development workflow is:
+- Code is edited in `/Users/admin/Dev/Projects/mission-control` (the git repo)
+- Changes are committed, pushed, and then pulled into this workspace
+- The production build runs here, but the source of truth is the git repo
+
+**The only files OpenClaw should write to this workspace are:**
+- `data/` — database files (runtime data, fine to modify)
+- `logs/` — log files
+- Shell scripts in the project root (e.g., `moonshot-balance.sh`)
+- Markdown docs (`INTEGRATION.md`, `QUICKSTART.md`, etc.)
+
+---
+
 ## What Is This?
 
 Mission Control is a personal dashboard for Jester (the AI assistant). It provides:
