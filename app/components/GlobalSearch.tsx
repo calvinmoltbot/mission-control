@@ -4,6 +4,17 @@ import { useState, useCallback, useEffect } from 'react';
 import { Search, FileText, Activity, Calendar, X, Clock } from 'lucide-react';
 import { format } from 'date-fns';
 
+function safeFormatDate(dateStr: string, formatStr: string): string {
+  if (!dateStr) return 'Unknown';
+  try {
+    const date = new Date(dateStr);
+    if (isNaN(date.getTime())) return 'Unknown';
+    return format(date, formatStr);
+  } catch {
+    return 'Unknown';
+  }
+}
+
 interface SearchResult {
   type: 'memory' | 'activity' | 'document' | 'task';
   title: string;
@@ -152,7 +163,7 @@ export function GlobalSearch() {
                     {result.date && (
                       <span className="flex items-center gap-1">
                         <Clock className="w-3 h-3" />
-                        {format(new Date(result.date), 'MMM d, yyyy')}
+                        {safeFormatDate(result.date, 'MMM d, yyyy')}
                       </span>
                     )}
                   </div>

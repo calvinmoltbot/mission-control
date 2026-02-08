@@ -2,6 +2,18 @@
 
 import { useEffect, useState } from 'react';
 import { formatDistanceToNow } from 'date-fns';
+
+function safeFormatDistanceToNow(dateStr: string): string {
+  if (!dateStr) return 'Unknown';
+  try {
+    const date = new Date(dateStr);
+    if (isNaN(date.getTime())) return 'Unknown';
+    return formatDistanceToNow(date, { addSuffix: true });
+  } catch {
+    return 'Unknown';
+  }
+}
+
 import {
   CheckCircle,
   AlertCircle,
@@ -150,7 +162,7 @@ export function ActivityFeed() {
                 <div className="flex items-center justify-between gap-2">
                   <h4 className="font-medium text-zinc-200 truncate">{activity.title}</h4>
                   <span className="text-[11px] text-zinc-600 flex-shrink-0 tabular-nums">
-                    {formatDistanceToNow(new Date(activity.created_at), { addSuffix: true })}
+                    {safeFormatDistanceToNow(activity.created_at)}
                   </span>
                 </div>
                 {activity.description && (

@@ -4,6 +4,17 @@ import { useEffect, useState } from 'react';
 import { formatDistanceToNow } from 'date-fns';
 import { Mail, Inbox, AlertCircle, CheckCircle, RefreshCw } from 'lucide-react';
 
+function safeFormatDistanceToNow(dateStr: string): string {
+  if (!dateStr) return 'Unknown';
+  try {
+    const date = new Date(dateStr);
+    if (isNaN(date.getTime())) return 'Unknown';
+    return formatDistanceToNow(date, { addSuffix: true });
+  } catch {
+    return 'Unknown';
+  }
+}
+
 interface Email {
   id: string;
   threadId: string;
@@ -126,7 +137,7 @@ export function GmailWidget() {
               </div>
               <div className="flex flex-col items-end gap-1">
                 <span className="text-[11px] text-zinc-600 tabular-nums">
-                  {formatDistanceToNow(new Date(email.date), { addSuffix: true })}
+                  {safeFormatDistanceToNow(email.date)}
                 </span>
                 {email.isUnread && (
                   <button
